@@ -1,5 +1,5 @@
 default:
-	g++ -Wall HashTable.cpp -o HashTable.out
+	g++ -Wall main.cpp -o main.out
 
 
 clean:
