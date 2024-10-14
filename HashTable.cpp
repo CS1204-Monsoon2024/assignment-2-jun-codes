@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <climits>
 
 class HashTable {
 private:
@@ -14,10 +15,16 @@ private:
     }
 
     int nextPrime(int n) {
-        for (int i = n; true; i++) {
-            if (isPrime(i))
-                return i;
+        if (n <= 1) return 2;
+        int prime = n;
+        bool found = false;
+
+        while (!found) {
+            prime++;
+            if (isPrime(prime))
+                found = true;
         }
+        return prime;
     }
 
     bool isPrime(int n) {
@@ -32,12 +39,15 @@ private:
 
     void resize() {
         int oldSize = currentSize;
-        auto oldTable = table;
-        auto oldOccupied = occupied;
+        std::vector<int> oldTable = table;
+        std::vector<bool> oldOccupied = occupied;
 
         currentSize = nextPrime(2 * currentSize);
-        table.resize(currentSize);
+        table.clear();
+        table.resize(currentSize, INT_MIN);
+        occupied.clear();
         occupied.resize(currentSize, false);
+        everUsed.clear();
         everUsed.resize(currentSize, false);
         numElements = 0;
 
@@ -56,7 +66,6 @@ private:
             index = (index + offset * offset) % currentSize; // Quadratic probing
             offset++;
             if (offset > currentSize) { // Prevent infinite loops
-                std::cout << "Max probing limit reached!" << std::endl;
                 return -1;
             }
         }
@@ -65,17 +74,21 @@ private:
 
 public:
     HashTable(int size) : currentSize(nextPrime(size)), numElements(0) {
-        table.resize(currentSize);
+        table.resize(currentSize, INT_MIN);
         occupied.resize(currentSize, false);
         everUsed.resize(currentSize, false);
     }
 
     void insert(int key) {
-        if (float(numElements) / currentSize >= 0.8) {
+        if (float(numElements + 1) / currentSize >= 0.8) {
             resize();
         }
         int pos = findPos(key);
-        if (pos == -1 || occupied[pos]) {
+        if (pos == -1) {
+            std::cout << "Max probing limit reached!" << std::endl;
+            return;
+        }
+        if (occupied[pos]) {
             std::cout << "Duplicate key insertion is not allowed" << std::endl;
             return;
         }
