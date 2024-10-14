@@ -79,12 +79,17 @@ public:
         }
 
         int initial_index = hash(key);
-        int index = initial_index;
         int i = 0;
+        int index;
         int first_deleted = -1;
 
-        while (slot_state[index] != EMPTY) {
-            if (slot_state[index] == OCCUPIED) {
+        while (true) {
+            index = (initial_index + i * i) % table_size;
+            if (index < 0) index += table_size;
+
+            if (slot_state[index] == EMPTY) {
+                break;
+            } else if (slot_state[index] == OCCUPIED) {
                 if (keys[index] == key) {
                     std::cout << "Duplicate key insertion is not allowed" << std::endl;
                     return;
@@ -94,9 +99,8 @@ public:
                     first_deleted = index;
                 }
             }
+
             i++;
-            index = (initial_index + i * i) % table_size;
-            if (index < 0) index += table_size;  // Ensure index is positive
             if (i >= table_size) {
                 std::cout << "Max probing limit reached!" << std::endl;
                 return;
@@ -114,41 +118,51 @@ public:
 
     void remove(int key) {
         int initial_index = hash(key);
-        int index = initial_index;
         int i = 0;
-        while (slot_state[index] != EMPTY) {
-            if (slot_state[index] == OCCUPIED && keys[index] == key) {
+        int index;
+
+        while (true) {
+            index = (initial_index + i * i) % table_size;
+            if (index < 0) index += table_size;
+
+            if (slot_state[index] == EMPTY) {
+                std::cout << "Element not found" << std::endl;
+                return;
+            } else if (slot_state[index] == OCCUPIED && keys[index] == key) {
                 slot_state[index] = DELETED;
                 keys[index] = -1;
                 current_size--;
                 return;
             }
+
             i++;
-            index = (initial_index + i * i) % table_size;
-            if (index < 0) index += table_size;  // Ensure index is positive
             if (i >= table_size) {
-                break;
+                std::cout << "Element not found" << std::endl;
+                return;
             }
         }
-        std::cout << "Element not found" << std::endl;
     }
 
     int search(int key) {
         int initial_index = hash(key);
-        int index = initial_index;
         int i = 0;
-        while (slot_state[index] != EMPTY) {
-            if (slot_state[index] == OCCUPIED && keys[index] == key) {
+        int index;
+
+        while (true) {
+            index = (initial_index + i * i) % table_size;
+            if (index < 0) index += table_size;
+
+            if (slot_state[index] == EMPTY) {
+                return -1;
+            } else if (slot_state[index] == OCCUPIED && keys[index] == key) {
                 return index;
             }
+
             i++;
-            index = (initial_index + i * i) % table_size;
-            if (index < 0) index += table_size;  // Ensure index is positive
             if (i >= table_size) {
                 return -1;
             }
         }
-        return -1;
     }
 
     void printTable() {
