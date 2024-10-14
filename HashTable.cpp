@@ -1,6 +1,5 @@
 #include <iostream>
-#include <cmath>
-
+#include <cmath>  // Include HashTable.cpp directly
 class HashTable {
 private:
     int* keys;
@@ -71,7 +70,6 @@ private:
     }
 
 public:
-    // Constructor to initialize the hash table with a prime size
     HashTable(int size) {
         table_size = next_prime(size);
         current_size = 0;
@@ -83,13 +81,11 @@ public:
         }
     }
 
-    // Destructor to free the allocated memory
     ~HashTable() {
         delete[] keys;
         delete[] occupied;
     }
 
-    // Insert a key into the hash table
     void insert(int key) {
         if ((double)current_size / table_size >= load_factor_threshold) {
             resize_table();
@@ -103,7 +99,6 @@ public:
         }
     }
 
-    // Remove a key from the hash table
     void remove(int key) {
         int index = hash(key);
         int i = 0;
@@ -123,7 +118,6 @@ public:
         std::cout << "Element not found" << std::endl;
     }
 
-    // Search for a key and return its index
     int search(int key) {
         int index = hash(key);
         int i = 0;
@@ -140,7 +134,6 @@ public:
         return -1;
     }
 
-    // Print the current state of the hash table
     void printTable() {
         for (int i = 0; i < table_size; ++i) {
             if (occupied[i]) {
@@ -152,3 +145,4 @@ public:
         std::cout << std::endl;
     }
 };
+
