@@ -37,7 +37,7 @@ private:
         keys = new int[table_size];
         slot_state = new SlotState[table_size];
 
-        for (int i = 0; i < table_size; ++i) {
+        for (int i = 0; i < (table_size + 1)/2; ++i) {
             keys[i] = -1;
             slot_state[i] = EMPTY;
         }
