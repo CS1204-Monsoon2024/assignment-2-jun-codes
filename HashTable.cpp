@@ -37,7 +37,7 @@ private:
         keys = new int[table_size];
         slot_state = new SlotState[table_size];
 
-        for (int i = 0; i < (table_size + 1)/2; ++i) {
+        for (int i = 0; i < table_size; ++i) {
             keys[i] = -1;
             slot_state[i] = EMPTY;
         }
@@ -78,17 +78,23 @@ public:
 
         int index = hash(key);
         int i = 0;
+        int initial_index = index;
         int first_deleted = -1;
+
         while (slot_state[index] != EMPTY) {
-            if (slot_state[index] == OCCUPIED && keys[index] == key) {
-                std::cout << "Duplicate key insertion is not allowed" << std::endl;
-                return;
+            if (slot_state[index] == OCCUPIED) {
+                if (keys[index] == key) {
+                    std::cout << "Duplicate key insertion is not allowed" << std::endl;
+                    return;
+                }
+            } else if (slot_state[index] == DELETED) {
+                if (first_deleted == -1) {
+                    first_deleted = index;
+                }
             }
-            if (slot_state[index] == DELETED && first_deleted == -1) {
-                first_deleted = index;
-            }
+
             i++;
-            index = (hash(key) + i * i) % table_size;
+            index = (initial_index + i * i) % table_size;
             if (i >= table_size) {
                 std::cout << "Max probing limit reached!" << std::endl;
                 return;
@@ -107,6 +113,7 @@ public:
     void remove(int key) {
         int index = hash(key);
         int i = 0;
+        int initial_index = index;
         while (slot_state[index] != EMPTY) {
             if (slot_state[index] == OCCUPIED && keys[index] == key) {
                 slot_state[index] = DELETED;
@@ -115,7 +122,7 @@ public:
                 return;
             }
             i++;
-            index = (hash(key) + i * i) % table_size;
+            index = (initial_index + i * i) % table_size;
             if (i >= table_size) {
                 break;
             }
@@ -126,12 +133,13 @@ public:
     int search(int key) {
         int index = hash(key);
         int i = 0;
+        int initial_index = index;
         while (slot_state[index] != EMPTY) {
             if (slot_state[index] == OCCUPIED && keys[index] == key) {
                 return index;
             }
             i++;
-            index = (hash(key) + i * i) % table_size;
+            index = (initial_index + i * i) % table_size;
             if (i >= table_size) {
                 return -1;
             }
