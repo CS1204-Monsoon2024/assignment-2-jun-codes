@@ -24,7 +24,9 @@ private:
     }
 
     int hash(int key) {
-        return key % table_size;
+        int h = key % table_size;
+        if (h < 0) h += table_size;
+        return h;
     }
 
     void resize_table() {
@@ -76,9 +78,9 @@ public:
             resize_table();
         }
 
-        int index = hash(key);
+        int initial_index = hash(key);
+        int index = initial_index;
         int i = 0;
-        int initial_index = index;
         int first_deleted = -1;
 
         while (slot_state[index] != EMPTY) {
@@ -92,7 +94,6 @@ public:
                     first_deleted = index;
                 }
             }
-
             i++;
             index = (initial_index + i * i) % table_size;
             if (i >= table_size) {
@@ -111,9 +112,9 @@ public:
     }
 
     void remove(int key) {
-        int index = hash(key);
+        int initial_index = hash(key);
+        int index = initial_index;
         int i = 0;
-        int initial_index = index;
         while (slot_state[index] != EMPTY) {
             if (slot_state[index] == OCCUPIED && keys[index] == key) {
                 slot_state[index] = DELETED;
@@ -131,9 +132,9 @@ public:
     }
 
     int search(int key) {
-        int index = hash(key);
+        int initial_index = hash(key);
+        int index = initial_index;
         int i = 0;
-        int initial_index = index;
         while (slot_state[index] != EMPTY) {
             if (slot_state[index] == OCCUPIED && keys[index] == key) {
                 return index;
@@ -158,3 +159,4 @@ public:
         std::cout << std::endl;
     }
 };
+
