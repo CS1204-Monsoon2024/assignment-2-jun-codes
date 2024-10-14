@@ -96,6 +96,7 @@ public:
             }
             i++;
             index = (initial_index + i * i) % table_size;
+            if (index < 0) index += table_size;  // Ensure index is positive
             if (i >= table_size) {
                 std::cout << "Max probing limit reached!" << std::endl;
                 return;
@@ -124,6 +125,7 @@ public:
             }
             i++;
             index = (initial_index + i * i) % table_size;
+            if (index < 0) index += table_size;  // Ensure index is positive
             if (i >= table_size) {
                 break;
             }
@@ -141,6 +143,7 @@ public:
             }
             i++;
             index = (initial_index + i * i) % table_size;
+            if (index < 0) index += table_size;  // Ensure index is positive
             if (i >= table_size) {
                 return -1;
             }
@@ -159,4 +162,3 @@ public:
         std::cout << std::endl;
     }
 };
-
