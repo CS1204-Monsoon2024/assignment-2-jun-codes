@@ -6,7 +6,7 @@ private:
     bool* occupied;
     int table_size;
     int current_size;
-    const double load_factor_threshold = 0.8;
+    double load_factor_threshold;
 
     bool is_prime(int n) {
         if (n < 2) return false;
@@ -71,6 +71,7 @@ private:
 
 public:
     HashTable(int size) {
+        load_factor_threshold = 0.8;
         table_size = next_prime(size);
         current_size = 0;
         keys = new int[table_size];
