@@ -37,22 +37,27 @@ private:
         }
 
         int old_size = table_size;
-        int* old_keys = keys;
-        bool* old_occupied = occupied;
-
-        keys = new_keys;
-        occupied = new_occupied;
         table_size = new_size;
-        current_size = 0;
 
         for (int i = 0; i < old_size; ++i) {
-            if (old_occupied[i]) {
-                insert(old_keys[i]);
+            if (occupied[i]) {
+                insert_to_new_table(new_keys, new_occupied, keys[i]);
             }
         }
 
-        delete[] old_keys;
-        delete[] old_occupied;
+        delete[] keys;
+        delete[] occupied;
+
+        keys = new_keys;
+        occupied = new_occupied;
+    }
+
+    void insert_to_new_table(int* new_keys, bool* new_occupied, int key) {
+        int index = quadratic_probe(key, new_keys, new_occupied, table_size);
+        if (index != -1) {
+            new_keys[index] = key;
+            new_occupied[index] = true;
+        }
     }
 
     int quadratic_probe(int key, int* keys_array, bool* occupied_array, int size) {
@@ -92,14 +97,14 @@ public:
     }
 
     void insert(int key) {
+        if ((double)current_size / table_size >= load_factor_threshold) {
+            resize_table();
+        }
         int index = quadratic_probe(key, keys, occupied, table_size);
         if (index != -1) {
             keys[index] = key;
             occupied[index] = true;
             current_size++;
-            if ((double)current_size / table_size >= load_factor_threshold) {
-                resize_table();
-            }
         }
     }
 
