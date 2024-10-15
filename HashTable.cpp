@@ -95,15 +95,21 @@ public:
     }
 
     void insert(int key, bool suppressMessages = false) {
-        if ((double)(current_size + 1) / table_size >= load_factor_threshold) {
-            resize_table();
-        }
-
         int index = quadratic_probe(key, suppressMessages);
         if (index != -1) {
             keys[index] = key;
             status[index] = OCCUPIED;
             current_size++;
+
+            // After inserting, check if load factor exceeds threshold
+            if ((double)current_size / table_size >= load_factor_threshold) {
+                resize_table();
+            }
+        } else {
+            // Quadratic probe failed to find a spot (table may be full)
+            // Resize and try inserting again
+            resize_table();
+            insert(key, suppressMessages);
         }
     }
 
