@@ -1,5 +1,5 @@
 #include <iostream>
-#include <cmath>  // For sqrt in is_prime
+#include <cmath>  // for sqrt in prime function
 
 class HashTable {
 private:
@@ -18,8 +18,8 @@ private:
         }
         return true;
     }
-
-    int next_prime(int n) {
+    //function to check next prime number using is prime
+    int next_prime(int n) { 
         while (!is_prime(n)) n++;
         return n;
     }
@@ -29,7 +29,7 @@ private:
     }
 
     void resize_table() {
-        int new_size = next_prime(table_size * 2);
+        int new_size = next_prime(table_size * 2); //atleast double and doing next prime
         int* old_keys = keys;
         EntryType* old_status = status;
         int old_size = table_size;
@@ -46,7 +46,7 @@ private:
         current_size = 0;
         for (int i = 0; i < old_size; ++i) {
             if (old_status[i] == OCCUPIED) {
-                insert(old_keys[i], true); // suppress messages during resizing
+                insert(old_keys[i], true); // suppress output messages during resizing
             }
         }
 
@@ -59,7 +59,7 @@ private:
         int i = 0;
         int initialIndex = index;
 
-        while (status[index] == OCCUPIED) {
+        while (status[index] == OCCUPIED) { //while loop to keep probing until condition m+1/2 is met
             if (keys[index] == key) {
                 if (!suppressMessages)
                     std::cout << "Duplicate key insertion is not allowed" << std::endl;
@@ -95,7 +95,7 @@ public:
     }
 
     void insert(int key, bool suppressMessages = false) {
-        // Check current load factor before insertion
+        // checking current load factor before insertion as we only update when after threshold crossed
         if ((double)current_size / table_size >= load_factor_threshold) {
             resize_table();
         }
@@ -116,7 +116,7 @@ public:
         while (status[index] != EMPTY) {
             if (status[index] == OCCUPIED && keys[index] == key) {
                 status[index] = DELETED;
-                keys[index] = -1; // Optional
+                keys[index] = -1; // optional
                 current_size--;
                 return;
             }
@@ -128,7 +128,7 @@ public:
         }
         std::cout << "Element not found" << std::endl;
     }
-
+    //keeps searching until condition for suficient probws
     int search(int key) {
         int index = hash(key);
         int i = 0;
