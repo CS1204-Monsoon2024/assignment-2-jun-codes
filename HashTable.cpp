@@ -4,12 +4,10 @@
 class HashTable {
 private:
     int* keys;
+    bool* occupied;
     int table_size;
     int current_size;
     double load_factor_threshold;
-
-    enum EntryType { EMPTY, OCCUPIED, DELETED };
-    EntryType* status;
 
     bool is_prime(int n) {
         if (n < 2) return false;
@@ -30,46 +28,45 @@ private:
 
     void resize_table() {
         int new_size = next_prime(table_size * 2);
-        int* old_keys = keys;
-        EntryType* old_status = status;
-        int old_size = table_size;
+        int* new_keys = new int[new_size];
+        bool* new_occupied = new bool[new_size];
 
-        table_size = new_size;
-        keys = new int[table_size];
-        status = new EntryType[table_size];
-
-        for (int i = 0; i < table_size; ++i) {
-            keys[i] = -1;
-            status[i] = EMPTY;
+        for (int i = 0; i < new_size; ++i) {
+            new_keys[i] = -1;
+            new_occupied[i] = false;
         }
 
+        int old_size = table_size;
+        int* old_keys = keys;
+        bool* old_occupied = occupied;
+
+        keys = new_keys;
+        occupied = new_occupied;
+        table_size = new_size;
         current_size = 0;
+
         for (int i = 0; i < old_size; ++i) {
-            if (old_status[i] == OCCUPIED) {
-                insert(old_keys[i], true); // suppress messages during resizing
+            if (old_occupied[i]) {
+                insert(old_keys[i]);
             }
         }
 
         delete[] old_keys;
-        delete[] old_status;
+        delete[] old_occupied;
     }
 
-    int quadratic_probe(int key, bool suppressMessages = false) {
+    int quadratic_probe(int key, int* keys_array, bool* occupied_array, int size) {
         int index = hash(key);
         int i = 0;
-        int initialIndex = index;
-
-        while (status[index] == OCCUPIED) {
-            if (keys[index] == key) {
-                if (!suppressMessages)
-                    std::cout << "Duplicate key insertion is not allowed" << std::endl;
+        while (occupied_array[index]) {
+            if (keys_array[index] == key) {
+                std::cout << "Duplicate key insertion is not allowed" << std::endl;
                 return -1;
             }
             i++;
-            index = (initialIndex + i * i) % table_size;
-            if (i > (table_size + 1) / 2) {
-                if (!suppressMessages)
-                    std::cout << "Max probing limit reached!" << std::endl;
+            index = (hash(key) + i * i) % size;
+            if (i > size / 2) {
+                std::cout << "Max probing limit reached!" << std::endl;
                 return -1;
             }
         }
@@ -81,47 +78,44 @@ public:
         load_factor_threshold = 0.8;
         table_size = next_prime(size);
         keys = new int[table_size];
-        status = new EntryType[table_size];
+        occupied = new bool[table_size];
         for (int i = 0; i < table_size; ++i) {
             keys[i] = -1;
-            status[i] = EMPTY;
+            occupied[i] = false;
         }
         current_size = 0;
     }
 
     ~HashTable() {
         delete[] keys;
-        delete[] status;
+        delete[] occupied;
     }
 
-    void insert(int key, bool suppressMessages = false) {
-        if ((double)(current_size + 1) / table_size >= load_factor_threshold) {
-            resize_table();
-        }
-
-        int index = quadratic_probe(key, suppressMessages);
+    void insert(int key) {
+        int index = quadratic_probe(key, keys, occupied, table_size);
         if (index != -1) {
             keys[index] = key;
-            status[index] = OCCUPIED;
+            occupied[index] = true;
             current_size++;
+            if ((double)current_size / table_size >= load_factor_threshold) {
+                resize_table();
+            }
         }
     }
 
     void remove(int key) {
         int index = hash(key);
         int i = 0;
-        int initialIndex = index;
-
-        while (status[index] != EMPTY) {
-            if (status[index] == OCCUPIED && keys[index] == key) {
-                status[index] = DELETED;
-                keys[index] = -1; // Optional
+        while (occupied[index]) {
+            if (keys[index] == key) {
+                occupied[index] = false;
+                keys[index] = -1;
                 current_size--;
                 return;
             }
             i++;
-            index = (initialIndex + i * i) % table_size;
-            if (i > (table_size + 1) / 2) {
+            index = (hash(key) + i * i) % table_size;
+            if (i > table_size / 2) {
                 break;
             }
         }
@@ -131,15 +125,13 @@ public:
     int search(int key) {
         int index = hash(key);
         int i = 0;
-        int initialIndex = index;
-
-        while (status[index] != EMPTY) {
-            if (status[index] == OCCUPIED && keys[index] == key) {
+        while (occupied[index]) {
+            if (keys[index] == key) {
                 return index;
             }
             i++;
-            index = (initialIndex + i * i) % table_size;
-            if (i > (table_size + 1) / 2) {
+            index = (hash(key) + i * i) % table_size;
+            if (i > table_size / 2) {
                 return -1;
             }
         }
@@ -148,7 +140,7 @@ public:
 
     void printTable() {
         for (int i = 0; i < table_size; ++i) {
-            if (status[i] == OCCUPIED) {
+            if (occupied[i]) {
                 std::cout << keys[i] << " ";
             } else {
                 std::cout << "- ";
